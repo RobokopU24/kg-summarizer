@@ -4,12 +4,13 @@ from pydantic import BaseModel
 
 from reasoner_pydantic import Response as PDResponse
 
-from kg_summarizer.trapi import GraphContainer
+from kg_summarizer.trapi import GraphContainer, parse_edge
 from kg_summarizer.ai import generate_response
 
 class LLMParameters(BaseModel):
     gpt_model: str
     temperature: Optional[float] = 0.0
+    system_prompt: Optional[str] = ''
 
 class TrapiParameters(BaseModel):
     result_idx: Optional[int] = 0
@@ -26,6 +27,9 @@ class ResponseItem(BaseModel):
     response: PDResponse
     parameters: Parameters
 
+class EdgeItem(BaseModel):
+    edge: dict
+    parameters: Parameters
 
 KG_SUM_VERSION = '0.1'
 
@@ -49,13 +53,23 @@ async def summarize_abstract_handler(item: AbstractItem):
     )
     return summary
 
-@app.post("/summarize/edges")
-async def summarize_edges_handler(item: ResponseItem):
+@app.post("/summarize/edge")
+async def summarize_edge_handler(item: EdgeItem):
+    edge = parse_edge(item)
 
-    g = GraphContainer(
-        item.response, 
-        verbose=False, 
-        result_idx=item.parameters.trapi.result_idx
+    spo_sentence = f"{edge['subject']} {edge['predicate']} {edge['object']}."
+
+    if item.parameters.llm.system_prompt:
+        system_prompt = item.parameters.llm.system_prompt
+    else:
+        system_prompt = f"""
+        Summarize the following edge publication abstracts listed in the knowledge graph. Make sure the summary supports the statement '{spo_sentence}'. Only use information explicitly stated in the publication abstracts. I repeat, do not make up any information.
+        """
+
+    summary = generate_response(
+        system_prompt, 
+        str(edge), 
+        item.parameters.llm.gpt_model,
+        item.parameters.llm.temperature,
     )
-
-    return 999
+    return summary

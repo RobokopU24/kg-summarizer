@@ -170,30 +170,6 @@ class GraphContainer:
                     }
 
     def get_edge_info(self, fetch_pubs=True):
-        def parse_edge_attributes(attr_list_of_dicts, fetch_pubs=True):
-            edge_attr_data = {
-                'publications': [],
-            }
-
-            for attr_dict in attr_list_of_dicts:
-                atid = attr_dict['attribute_type_id']
-
-                if atid == 'biolink:publications': 
-                    # Sometimes there are multiple publication attributes so extend list then fetch non-duplicates at the end
-                    publication_ids = attr_dict['value']
-                    edge_attr_data['publications'].extend(publication_ids)
-
-                if atid == 'biolink:support_graphs':
-                    edge_attr_data['support_graphs'] = attr_dict['value']
-
-            # Remove duplicates
-            edge_attr_data['publications'] = list(set(edge_attr_data['publications']))
-
-            if fetch_pubs:
-                edge_attr_data['publications'] = get_publications(edge_attr_data['publications'])
-
-            return edge_attr_data
-
         self.edges = []
         edge_list = []
 
@@ -379,3 +355,38 @@ def get_publications(pub_id_list):
                 pub_list.append({pubid: abstract})
 
     return pub_list
+
+def parse_edge_attributes(attr_list_of_dicts, fetch_pubs=True):
+    edge_attr_data = {
+        'publications': [],
+    }
+
+    for attr_dict in attr_list_of_dicts:
+        atid = attr_dict['attribute_type_id']
+
+        if atid == 'biolink:publications': 
+            # Sometimes there are multiple publication attributes so extend list then fetch non-duplicates at the end
+            publication_ids = attr_dict['value']
+            edge_attr_data['publications'].extend(publication_ids)
+
+        if atid == 'biolink:support_graphs':
+            edge_attr_data['support_graphs'] = attr_dict['value']
+
+    # Remove duplicates
+    edge_attr_data['publications'] = list(set(edge_attr_data['publications']))
+
+    if fetch_pubs:
+        edge_attr_data['publications'] = get_publications(edge_attr_data['publications'])
+
+    return edge_attr_data
+
+def parse_edge(edge_data):
+    parsed_data = dict(
+        subject=edge_data['source']['name'],
+        object=edge_data['target']['name'],
+        predicate=edge_data['predicate'].split(':')[1]
+    )
+
+    edge_attr_data = parse_edge_attributes(edge_data['attributes'])
+
+    return {**parsed_data, **edge_attr_data}
