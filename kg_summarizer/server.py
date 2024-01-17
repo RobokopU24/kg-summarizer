@@ -2,42 +2,50 @@ from fastapi import FastAPI
 from typing import Optional
 from pydantic import BaseModel
 
-from reasoner_pydantic import Response as PDResponse
+# from reasoner_pydantic import Response as PDResponse
 
-from kg_summarizer.trapi import GraphContainer, parse_edge
+from kg_summarizer.trapi import EdgeContainer
 from kg_summarizer.ai import generate_response
+
 
 class LLMParameters(BaseModel):
     gpt_model: str
     temperature: Optional[float] = 0.0
-    system_prompt: Optional[str] = ''
+    system_prompt: Optional[str] = ""
 
-class TrapiParameters(BaseModel):
-    result_idx: Optional[int] = 0
+
+# class TrapiParameters(BaseModel):
+#     result_idx: Optional[int] = 0
+
 
 class Parameters(BaseModel):
     llm: Optional[LLMParameters]
-    trapi: Optional[TrapiParameters]
+    # trapi: Optional[TrapiParameters]
+
 
 class AbstractItem(BaseModel):
     abstract: str
     parameters: Parameters
 
-class ResponseItem(BaseModel):
-    response: PDResponse
-    parameters: Parameters
+
+# class ResponseItem(BaseModel):
+#     response: PDResponse
+#     parameters: Parameters
+
 
 class EdgeItem(BaseModel):
     edge: dict
     parameters: Parameters
 
-KG_SUM_VERSION = '0.1'
+
+KG_SUM_VERSION = "0.1"
 
 # declare the application and populate some details
 app = FastAPI(
-    title='Knowledge Graph Summarizer - A FastAPI UI/web service',
-    version=KG_SUM_VERSION
+    title="Knowledge Graph Summarizer - A FastAPI UI/web service",
+    version=KG_SUM_VERSION,
 )
+
 
 @app.post("/summarize/abstract")
 async def summarize_abstract_handler(item: AbstractItem):
@@ -46,18 +54,19 @@ async def summarize_abstract_handler(item: AbstractItem):
     """
 
     summary = generate_response(
-        system_prompt, 
-        item.abstract, 
+        system_prompt,
+        item.abstract,
         item.parameters.llm.gpt_model,
         item.parameters.llm.temperature,
     )
     return summary
 
+
 @app.post("/summarize/edge")
 async def summarize_edge_handler(item: EdgeItem):
-    edge = parse_edge(item)
+    edge = EdgeContainer(item)
 
-    spo_sentence = f"{edge['subject']} {edge['predicate']} {edge['object']}."
+    spo_sentence = edge.format_spo_sentence()
 
     if item.parameters.llm.system_prompt:
         system_prompt = item.parameters.llm.system_prompt
@@ -67,8 +76,8 @@ async def summarize_edge_handler(item: EdgeItem):
         """
 
     summary = generate_response(
-        system_prompt, 
-        str(edge), 
+        system_prompt,
+        str(edge),
         item.parameters.llm.gpt_model,
         item.parameters.llm.temperature,
     )
