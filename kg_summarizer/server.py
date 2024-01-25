@@ -38,7 +38,7 @@ class EdgeItem(BaseModel):
     parameters: Parameters
 
 
-KG_SUM_VERSION = "0.0.3"
+KG_SUM_VERSION = "0.0.4"
 
 # declare the application and populate some details
 app = FastAPI(
