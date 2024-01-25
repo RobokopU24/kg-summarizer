@@ -9,7 +9,7 @@ from kg_summarizer.ai import generate_response
 
 
 class LLMParameters(BaseModel):
-    gpt_model: str
+    gpt_model: str = "gpt-3.5-turbo"
     temperature: Optional[float] = 0.0
     system_prompt: Optional[str] = ""
 
@@ -38,7 +38,7 @@ class EdgeItem(BaseModel):
     parameters: Parameters
 
 
-KG_SUM_VERSION = "0.0.4"
+KG_SUM_VERSION = "0.0.5"
 
 # declare the application and populate some details
 app = FastAPI(
@@ -64,7 +64,7 @@ async def summarize_abstract_handler(item: AbstractItem):
 
 @app.post("/summarize/edge")
 async def summarize_edge_handler(item: EdgeItem):
-    edge = EdgeContainer(item)
+    edge = EdgeContainer(item.edge)
 
     spo_sentence = edge.format_spo_sentence()
 
