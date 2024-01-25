@@ -14,7 +14,7 @@ RUN mkdir /repo
 WORKDIR /repo
 
 # get the latest code
-RUN git clone --branch $BRANCH_NAME --single-branch https://github.com/jrichardson97/kg-summarizer.git
+RUN git clone --branch $BRANCH_NAME --single-branch https://github.com/RobokopU24/kg-summarizer.git
 
 # go to the repo dir
 WORKDIR /repo/kg-summarizer
