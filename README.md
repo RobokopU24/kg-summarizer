@@ -13,5 +13,6 @@ uvicorn main:app --reload
 1) Push changes and make new release on github
     - Make sure release version matches FastAPI docs version in kg_summarizer/server.py and setup.py
 2) Update Helm chart
+    - Update values.yaml with new release version
     - cd translator-devops/helm/kg-summarizer
     - helm -n translator-dev upgrade -f values-populated.yaml kg-summarizer .
