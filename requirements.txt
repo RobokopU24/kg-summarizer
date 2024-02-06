@@ -5,3 +5,4 @@ fastapi
 pydantic
 jupyter
 reasoner-pydantic
+uvicorn

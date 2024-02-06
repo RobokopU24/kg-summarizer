@@ -1,6 +1,9 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from typing import Optional
 from pydantic import BaseModel
+import kg_summarizer.config as CFG
 
 # from reasoner_pydantic import Response as PDResponse
 
@@ -38,7 +41,7 @@ class EdgeItem(BaseModel):
     parameters: Parameters
 
 
-KG_SUM_VERSION = "0.0.6"
+KG_SUM_VERSION = "0.0.7"
 
 # declare the application and populate some details
 app = FastAPI(
@@ -46,6 +49,22 @@ app = FastAPI(
     version=KG_SUM_VERSION,
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex="^https?:\/\/(((.+\.)*?renci\.org)|(localhost))(:\d{1,5})?(\/.*)?$", # localhost and *.renci.org
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+)
+
+# if we're in development mode (PYTHON_ENV=dev) tell the browser we can access the server on this
+# user's local machine. See https://developer.chrome.com/blog/private-network-access-preflight
+if CFG.ENV.get("PYTHON_ENV") == "dev":
+    class PrivateNetworkHeaderMiddleware(BaseHTTPMiddleware):
+        async def dispatch(self, request, call_next):
+            response = await call_next(request)
+            response.headers['Access-Control-Allow-Private-Network'] = 'true'
+            return response
+    app.add_middleware(PrivateNetworkHeaderMiddleware)
 
 @app.post("/summarize/abstract")
 async def summarize_abstract_handler(item: AbstractItem):
