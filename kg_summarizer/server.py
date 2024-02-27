@@ -39,7 +39,7 @@ class EdgeItem(BaseModel):
     parameters: Parameters
 
 
-KG_SUM_VERSION = "0.0.8"
+KG_SUM_VERSION = "0.0.9"
 
 # declare the application and populate some details
 app = FastAPI(
@@ -95,17 +95,22 @@ async def summarize_edge_handler(item: EdgeItem):
         Summarize the following edge publication abstracts listed in the knowledge graph. Make sure the summary supports the statement '{spo_sentence}'. Only use information explicitly stated in the publication abstracts. I repeat, do not make up any information.
         """
 
-    logger.info(f"GPT Prompt: {system_prompt}")
-    logger.info(f"GPT Mode: {item.parameters.llm.gpt_model}")
-    logger.info(f"GPT Temperature: {item.parameters.llm.temperature}")
-    logger.info(f"GPT Input: {edge}")
+    if edge["edge"]["publications"] or edge["edge"]["sentences"]:
+        logger.info(f"GPT Prompt: {system_prompt}")
+        logger.info(f"GPT Mode: {item.parameters.llm.gpt_model}")
+        logger.info(f"GPT Temperature: {item.parameters.llm.temperature}")
+        logger.info(f"GPT Input: {edge}")
+        summary = generate_response(
+            system_prompt,
+            str(edge),
+            item.parameters.llm.gpt_model,
+            item.parameters.llm.temperature,
+        )
+    else:
+        logger.info(
+            "Edge contained no publications or sentences. Returning with standarized summary."
+        )
+        summary = f"The edge '{spo_sentence}' contains no publications or supporting sentences for an LLM to summarize."
 
-    summary = generate_response(
-        system_prompt,
-        str(edge),
-        item.parameters.llm.gpt_model,
-        item.parameters.llm.temperature,
-    )
-
-    logger.info(f"GPT Summary: {summary}")
+    logger.info(f"Edge Summary: {summary}")
     return summary
