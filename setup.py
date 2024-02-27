@@ -1,4 +1,5 @@
 """Setup file for reasoner package."""
+
 from pathlib import Path
 
 from setuptools import setup
@@ -8,7 +9,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="kg-summarizer",
-    version="0.0.7",
+    version="0.0.8",
     author="Joey Richardson",
     author_email="richardson.joey.b@gmail.com",
     url="https://github.com/jrichardson97/kg-summarizer",

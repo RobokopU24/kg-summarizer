@@ -26,3 +26,12 @@ For webapps developed against a local deployment of this service, the `PYTHON_EN
     - Update values.yaml with new release version
     - cd translator-devops/helm/kg-summarizer
     - helm -n translator-dev upgrade -f values-populated.yaml kg-summarizer .
+
+
+## Redis server
+Start server: redis-server --dbfilename aragorn_cache.rdb --dir /home/joeyr/data/kg_summarizer
+
+## Todo
+- Add check for publications before feeding into LLM
+- Add logging to server (talk to yaphet)
+
