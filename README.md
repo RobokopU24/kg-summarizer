@@ -31,5 +31,8 @@ For webapps developed against a local deployment of this service, the `PYTHON_EN
 ## Redis server
 Start server: redis-server --dbfilename aragorn_cache.rdb --dir /home/joeyr/data/kg_summarizer
 
+## API Location
+https://kg-summarizer.apps.renci.org/docs
+
 ## Todo
 

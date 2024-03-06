@@ -160,6 +160,7 @@ class GraphContainer:
     response: dict
     verbose: bool = True
     result_idx: int = 0
+    fetch_pubs: bool = True
     graph_type: str = field(init=False)  # lookup or creative
     sorted_results: list = field(default_factory=list, init=False)
     result: dict = field(default_factory=dict, init=False)
@@ -191,7 +192,7 @@ class GraphContainer:
         self.result_idx = idx
         self.result = self.sorted_results[idx]
         self.get_node_info()
-        self.get_edge_info()
+        self.get_edge_info(fetch_pubs=self.fetch_pubs)
         self.vprint(f"Result: \n{self.result}\n")
 
     def vprint(self, msg):
@@ -241,9 +242,10 @@ class GraphContainer:
             node_attr_data["same_as"] = list(set(node_attr_data["same_as"]))
 
             # Fetch publications
-            node_attr_data["publications"] = get_publications(
-                node_attr_data["publications"]
-            )
+            if self.fetch_pubs:
+                node_attr_data["publications"] = get_publications(
+                    node_attr_data["publications"]
+                )
 
             return node_attr_data
 
