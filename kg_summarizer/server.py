@@ -10,7 +10,7 @@ import json
 import kg_summarizer.config as CFG
 from kg_summarizer.trapi import EdgeContainer
 from kg_summarizer.ai import generate_response
-from kg_summarizer.utils import LoggingUtil
+from kg_summarizer.utils import LoggingUtil, append_to_file
 
 
 logger = LoggingUtil.init_logging(
@@ -42,7 +42,7 @@ class EdgeItem(BaseModel):
     parameters: Parameters
 
 
-KG_SUM_VERSION = "0.0.12"
+KG_SUM_VERSION = "0.0.13"
 
 # declare the application and populate some details
 app = FastAPI(
@@ -98,12 +98,14 @@ async def summarize_edge_handler(item: EdgeItem):
             edge = EdgeContainer(json.load(f))
 
     logger.info(f"Edge: {edge}")
+    append_to_file(f"Edge: {edge}")
     if item.parameters.summarize_abstracts:
         edge.summarize_edge_abstracts(
             model=item.parameters.llm.gpt_model,
             temperature=item.parameters.llm.temperature,
         )
         logger.info(f"Edge with summarized abstracts: {edge}")
+        append_to_file(f"Edge with summarized abstracts: {edge}")
 
     spo_sentence = edge.format_spo_sentence()
 
@@ -118,6 +120,9 @@ async def summarize_edge_handler(item: EdgeItem):
         logger.info(f"GPT Prompt: {system_prompt}")
         logger.info(f"GPT Mode: {item.parameters.llm.gpt_model}")
         logger.info(f"GPT Temperature: {item.parameters.llm.temperature}")
+        append_to_file(f"GPT Prompt: {system_prompt}")
+        append_to_file(f"GPT Mode: {item.parameters.llm.gpt_model}")
+        append_to_file(f"GPT Temperature: {item.parameters.llm.temperature}")
         summary += generate_response(
             system_prompt,
             str(edge),
@@ -128,7 +133,11 @@ async def summarize_edge_handler(item: EdgeItem):
         logger.info(
             "Edge contained no publications or sentences. Returning with standarized summary."
         )
+        append_to_file(
+            "Edge contained no publications or sentences. Returning with standarized summary."
+        )
         summary += f"The edge '{spo_sentence}' contains no publications or supporting sentences for an LLM to summarize."
 
+    append_to_file(f"Edge Summary: {summary}")
     logger.info(f"Edge Summary: {summary}")
     return summary

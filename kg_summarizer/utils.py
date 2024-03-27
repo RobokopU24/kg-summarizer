@@ -9,6 +9,17 @@ import os
 import pathlib
 
 
+def append_to_file(message):
+    log_file_path = (
+        pathlib.Path(__file__).parents[1].joinpath("logs/kg_summarizer_manual.log")
+    )
+    try:
+        with open(log_file_path, "a") as file:
+            file.write(message + "\n")
+    except Exception as e:
+        print("An error occurred:", str(e))
+
+
 class LoggingUtil(object):
     """Logging utility controlling format and setting initial logging level"""
 
