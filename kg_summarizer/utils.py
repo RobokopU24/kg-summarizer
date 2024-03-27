@@ -6,6 +6,7 @@ from kg_summarizer.config import CACHE_DIR
 import logging
 from logging.handlers import RotatingFileHandler
 import os
+import pathlib
 
 
 class LoggingUtil(object):
@@ -15,8 +16,8 @@ class LoggingUtil(object):
     def init_logging(
         name, level=logging.INFO, format_sel="medium", log_file_level=None
     ):
-        log_file_path = os.path.join(
-            os.path.dirname(__file__), "../logs/kg_summarizer.log"
+        log_file_path = (
+            pathlib.Path(__file__).parents[1].joinpath("logs/kg_summarizer.log")
         )
         # get a logger
         logger = logging.getLogger(__name__)

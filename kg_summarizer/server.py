@@ -15,7 +15,7 @@ from kg_summarizer.utils import LoggingUtil
 
 logger = LoggingUtil.init_logging(
     __name__,
-    level=logging.INFO,
+    level=logging.DEBUG,
     format_sel="medium",
 )
 
@@ -42,7 +42,7 @@ class EdgeItem(BaseModel):
     parameters: Parameters
 
 
-KG_SUM_VERSION = "0.0.11"
+KG_SUM_VERSION = "0.0.12"
 
 # declare the application and populate some details
 app = FastAPI(
