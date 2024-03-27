@@ -35,4 +35,9 @@ Start server: redis-server --dbfilename aragorn_cache.rdb --dir /home/joeyr/data
 https://kg-summarizer.apps.renci.org/docs
 
 ## Todo
-
+- Redis database indices changed???
+- This example is interesting because Cisplatin is shown to treat multiple subclasses of mucin-producing carcinoma. Can GPT summarize this well? Don't have example indices anymore 
+- Add pyunit tests
+    - Aragorn and strider have unit tests
+- Add abstract summary preprocess flag to server
+- Create database dataclass and sort keys as initialization

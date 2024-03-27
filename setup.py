@@ -9,7 +9,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="kg-summarizer",
-    version="0.0.10",
+    version="0.0.11",
     author="Joey Richardson",
     author_email="richardson.joey.b@gmail.com",
     url="https://github.com/jrichardson97/kg-summarizer",

@@ -28,6 +28,7 @@ class LLMParameters(BaseModel):
 
 class Parameters(BaseModel):
     llm: Optional[LLMParameters]
+    summarize_abstracts: Optional[bool] = False
     # trapi: Optional[TrapiParameters]
 
 
@@ -41,7 +42,7 @@ class EdgeItem(BaseModel):
     parameters: Parameters
 
 
-KG_SUM_VERSION = "0.0.10"
+KG_SUM_VERSION = "0.0.11"
 
 # declare the application and populate some details
 app = FastAPI(
@@ -96,20 +97,27 @@ async def summarize_edge_handler(item: EdgeItem):
         with open(p) as f:
             edge = EdgeContainer(json.load(f))
 
+    logger.info(f"Edge: {edge}")
+    if item.parameters.summarize_abstracts:
+        edge.summarize_edge_abstracts(
+            model=item.parameters.llm.gpt_model,
+            temperature=item.parameters.llm.temperature,
+        )
+        logger.info(f"Edge with summarized abstracts: {edge}")
+
     spo_sentence = edge.format_spo_sentence()
 
     if item.parameters.llm.system_prompt:
         system_prompt = item.parameters.llm.system_prompt
     else:
         system_prompt = f"""
-        Summarize the following edge publication abstracts listed in the knowledge graph. Make sure the summary supports the statement '{spo_sentence}'. Only use information explicitly stated in the publication abstracts. I repeat, do not make up any information.
+        Summarize the following edge publication abstracts listed in the knowledge graph. Make sure the summary supports the statement '{spo_sentence}'. Only use information explicitly stated in the publication abstracts. I repeat, do not make up any information. Include a bulleted list of key facts from the abstracts that support the statement '{spo_sentence}'.
         """
 
     if edge.edge["publications"] or edge.edge["sentences"]:
         logger.info(f"GPT Prompt: {system_prompt}")
         logger.info(f"GPT Mode: {item.parameters.llm.gpt_model}")
         logger.info(f"GPT Temperature: {item.parameters.llm.temperature}")
-        logger.info(f"GPT Input: {edge}")
         summary += generate_response(
             system_prompt,
             str(edge),

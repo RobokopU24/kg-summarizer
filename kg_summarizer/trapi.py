@@ -11,6 +11,8 @@ from kg_summarizer.utils import (
     unique_name_from_str,
 )
 
+from kg_summarizer.ai import generate_response
+
 
 def get_publications(pub_id_list):
     pub_list = []
@@ -70,6 +72,29 @@ class EdgeContainer:
 
     def format_spo_sentence(self):
         return f"{self.edge['subject']} {self.edge['predicate']} {self.edge['object']}"
+
+    def summarize_edge_abstracts(self, system_prompt=None, model=None, temperature=0):
+        if system_prompt is None:
+            system_prompt = f"""
+                You are a pharmacology researcher summarizing publication abstracts. Condense the follow abstract to a single sentence.
+            """
+
+        if model is None:
+            model = "gpt-3.5-turbo"
+
+        summary_list = []
+        for pub_dict in self.edge["publications"]:
+            k = list(pub_dict.keys())[0]
+            abstract = pub_dict[k]
+            summary_list.append(
+                {
+                    k: generate_response(
+                        system_prompt, abstract, model=model, temperature=temperature
+                    )
+                }
+            )
+
+        self.edge["publications"] = summary_list
 
     def __str__(self):
         return str(dict(nodes=self.nodes, edge=self.edge)).replace("'", "")
